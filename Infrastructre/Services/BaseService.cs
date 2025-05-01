@@ -33,4 +33,3 @@ public class BaseService<TEntity>(IUnitOfWork unitOfWork) : IBaseService<TEntity
         return _unitOfWork.Repository<TEntity>().GetByIdAsync(id);
     }
 }
-

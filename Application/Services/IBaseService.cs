@@ -7,4 +7,3 @@ public interface IBaseService<TEntity> where TEntity : class
     Task<IEnumerable<TDto>> GetAllAsync<TDto>();
     Task<TEntity?> GetByIdAsync(int id);
 }
-

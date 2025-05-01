@@ -1,37 +1,52 @@
 ﻿using System.Net;
 using System.Text.Json;
+using Serilog;
 
-namespace API.Middlewares;
-public class ExceptionMiddleware(RequestDelegate next, IHostEnvironment hostEnvironment)
+namespace API.Middlewares
 {
-    private readonly RequestDelegate _next = next;
-    private readonly IHostEnvironment _hostEnvironment = hostEnvironment;
-
-    public async Task InvokeAsync(HttpContext context)
+    public class ExceptionMiddleware(RequestDelegate next, IHostEnvironment hostEnvironment)
     {
-        try
+        private readonly RequestDelegate _next = next;
+        private readonly IHostEnvironment _hostEnvironment = hostEnvironment;
+
+        public async Task InvokeAsync(HttpContext context)
         {
-            await _next(context);
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                // تأكد من أن أي خطأ يتم رميه يسجل في Serilog.
+                Log.Error(ex, "An unhandled exception has occurred.");
+
+                await HandleExceptionAsync(context, ex);
+            }
+
+            // إضافة تسجيل أخطاء HTTP من نوع BadRequest (400) أو غيرها من الأخطاء
+            if (context.Response.StatusCode == StatusCodes.Status400BadRequest)
+            {
+                Log.Warning("BadRequest Error: {ErrorMessage}", await context.Request.ReadFromJsonAsync<object>());
+            }
+
+            if (context.Response.StatusCode == StatusCodes.Status404NotFound)
+            {
+                Log.Warning("NotFound Error: {ErrorMessage}", await context.Request.ReadFromJsonAsync<object>());
+            }
         }
-        catch (Exception ex)
+
+        private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            await HandleExceptionAsync(context, ex);
+            var code = HttpStatusCode.InternalServerError;
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)code;
+
+            var response = _hostEnvironment.IsDevelopment()
+                ? new ApiExceptionResponse((int)code, exception.Message, exception.StackTrace ?? string.Empty)
+                : new ApiExceptionResponse((int)code);
+
+            var json = JsonSerializer.Serialize(response);
+            await context.Response.WriteAsync(json);
         }
-    }
-
-    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
-        var code = HttpStatusCode.InternalServerError;
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)code;
-
-        var response = _hostEnvironment.IsDevelopment()
-            ? new ApiExceptionResponse((int)code, exception.Message, exception.StackTrace ?? string.Empty)
-            : new ApiExceptionResponse((int)code);
-
-        var json = JsonSerializer.Serialize(response);
-        await context.Response.WriteAsync(json);
     }
 }
-
-
