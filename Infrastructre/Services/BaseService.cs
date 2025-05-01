@@ -1,33 +1,47 @@
-﻿using Application.Repositories;
+﻿using Application.Pagination;
+using Application.Repositories;
+using Application.RequestFilters;
 using Application.Services;
+using Infrastructre.Data;
 using Mapster;
 
 namespace Infrastructre.Services;
+
 public class BaseService<TEntity>(IUnitOfWork unitOfWork) : IBaseService<TEntity> where TEntity : class
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
-    public Task<bool> CreateAsync(TEntity entity)
+
+    public async Task<bool> CreateAsync(TEntity entity)
     {
-        var repository = _unitOfWork.Repository<TEntity>().AddAsync(entity);
-        return _unitOfWork.CompleteAsync().ContinueWith(task => task.Result > 0);
+        await _unitOfWork.Repository<TEntity>().AddAsync(entity);
+        return await _unitOfWork.CompleteAsync() > 0;
     }
-    public Task<bool> DeleteAsync(TEntity entity)
+
+    public async Task<bool> DeleteAsync(TEntity entity)
     {
-        var repository = _unitOfWork.Repository<TEntity>();
-        repository.HardDeleteAsync(entity);
-        return _unitOfWork.CompleteAsync().ContinueWith(task => task.Result > 0);
+        await _unitOfWork.Repository<TEntity>().HardDeleteAsync(entity);
+        return await _unitOfWork.CompleteAsync() > 0;
     }
-    public Task<bool> UpdateAsync(TEntity entity)
+
+    public async Task<bool> UpdateAsync(TEntity entity)
     {
-        var repository = _unitOfWork.Repository<TEntity>();
-        repository.UpdateAsync(entity);
-        return _unitOfWork.CompleteAsync().ContinueWith(task => task.Result > 0);
+        await _unitOfWork.Repository<TEntity>().UpdateAsync(entity);
+        return await _unitOfWork.CompleteAsync() > 0;
     }
-    public async Task<IEnumerable<TDto>> GetAllAsync<TDto>()
+
+    public async Task<PaginatedList<TEntity>> GetAllAsync(RequestFilter requestFilter)
     {
-        var entities = await _unitOfWork.Repository<TEntity>().GetAllAsync();
-        return entities.Adapt<IEnumerable<TDto>>();
+        var entities =  _unitOfWork.Repository<TEntity>().GetQueryable();
+
+        var paginatedEntities = await PaginatedList<TEntity>.CreateAsync(
+            entities,
+            requestFilter.PageNumber,
+            requestFilter.PageSize
+        );
+
+        return paginatedEntities;
     }
+
     public Task<TEntity?> GetByIdAsync(int id)
     {
         return _unitOfWork.Repository<TEntity>().GetByIdAsync(id);

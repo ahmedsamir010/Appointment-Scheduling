@@ -1,4 +1,6 @@
-﻿namespace API.Controllers;
+﻿using Application.RequestFilters;
+
+namespace API.Controllers;
 /// <summary>
 /// Controller for managing appointments.
 /// </summary>
@@ -11,9 +13,9 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
     /// </summary>
     /// <returns>List of appointments.</returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> Get()
+    public async Task<ActionResult<IEnumerable<AppointmentResponse>>> Get([FromQuery] RequestFilter requestFilter)
     {
-        var appointments = await appointmentService.GetAllAsync<AppointmentResponse>();
+        var appointments = await appointmentService.GetAllAsync(requestFilter);
         return Ok(appointments);
     }
 

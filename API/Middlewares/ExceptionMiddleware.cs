@@ -17,13 +17,12 @@ namespace API.Middlewares
             }
             catch (Exception ex)
             {
-                // تأكد من أن أي خطأ يتم رميه يسجل في Serilog.
+
                 Log.Error(ex, "An unhandled exception has occurred.");
 
                 await HandleExceptionAsync(context, ex);
             }
 
-            // إضافة تسجيل أخطاء HTTP من نوع BadRequest (400) أو غيرها من الأخطاء
             if (context.Response.StatusCode == StatusCodes.Status400BadRequest)
             {
                 Log.Warning("BadRequest Error: {ErrorMessage}", await context.Request.ReadFromJsonAsync<object>());

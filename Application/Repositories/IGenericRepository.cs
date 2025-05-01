@@ -5,5 +5,6 @@ public interface IGenericRepository<TEntity> where TEntity : class
     Task HardDeleteAsync(TEntity entity);
     Task UpdateAsync(TEntity entity);
     Task<IEnumerable<TEntity>> GetAllAsync();
+    IQueryable<TEntity> GetQueryable();
     Task<TEntity?> GetByIdAsync(int id);
 }

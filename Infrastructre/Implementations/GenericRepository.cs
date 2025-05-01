@@ -26,4 +26,7 @@ public class GenericRepository<T>(ApplicationDbContext dbContext) : IGenericRepo
 
     public async Task<T?> GetByIdAsync(int id)
         => await dbContext.Set<T>().FindAsync(id);
+    public IQueryable<T> GetQueryable()
+        => dbContext.Set<T>().AsQueryable();
+
 }
