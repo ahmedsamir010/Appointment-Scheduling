@@ -1,0 +1,16 @@
+﻿global using API.Errors;
+global using Application.Services;
+global using Domain.Entities;
+global using Mapster;
+global using Microsoft.AspNetCore.Mvc;
+global using Application.Repositories;
+global using Infrastructre.Data;
+global using Infrastructre.Implementations;
+global using MapsterMapper;
+global using System.Reflection;
+global using Microsoft.OpenApi.Models;
+global using Application.DTOs.Request;
+global using Application.DTOs.Response;
+global using API.ExtensionsMethods;
+global using API.Middlewares;
+global using Microsoft.EntityFrameworkCore;
