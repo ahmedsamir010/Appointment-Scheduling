@@ -1,9 +1,6 @@
 using Serilog;
 using Serilog.Sinks.MSSqlServer;
-
 var builder = WebApplication.CreateBuilder(args);
-
-
 builder.Host.UseSerilog((context, services, configuration) =>
 {
     configuration
@@ -18,10 +15,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
                 AutoCreateSqlTable = true  
             });
 });
-
-
 builder.Services.AddControllers();
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>

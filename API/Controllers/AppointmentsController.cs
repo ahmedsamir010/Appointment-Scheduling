@@ -58,7 +58,7 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
     /// </summary>
     /// <param name="Id">The ID of the appointment to delete.</param>
     /// <returns>Status of the deletion process.</returns>
-    [HttpDelete("{id}")]
+    [HttpDelete("{Id}")]
     public async Task<IActionResult> Delete(int Id)
     {
         var entity = await appointmentService.GetByIdAsync(Id);
