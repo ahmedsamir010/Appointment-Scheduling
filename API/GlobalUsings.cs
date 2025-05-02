@@ -12,5 +12,5 @@ global using Microsoft.OpenApi.Models;
 global using Application.DTOs.Request;
 global using Application.DTOs.Response;
 global using API.ExtensionsMethods;
-global using API.Middlewares;
 global using Microsoft.EntityFrameworkCore;
+global using Application.RequestFilters;

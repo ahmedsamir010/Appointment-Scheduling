@@ -20,7 +20,6 @@ public class GenericRepository<T>(ApplicationDbContext dbContext) : IGenericRepo
         dbContext.Set<T>().Update(entity);
         return Task.CompletedTask;
     }
-
     public async Task<IEnumerable<T>> GetAllAsync()
         => await dbContext.Set<T>().AsNoTracking().ToListAsync();
 

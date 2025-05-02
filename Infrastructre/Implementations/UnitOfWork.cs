@@ -24,7 +24,6 @@ public class UnitOfWork(ApplicationDbContext dbContext) : IUnitOfWork
 
         return newRepo;
     }
-
     public async Task<int> CompleteAsync()
         => await _dbContext.SaveChangesAsync();
 

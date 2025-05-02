@@ -44,11 +44,13 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
     public async Task<IActionResult> Create(CreateAppointmentRequest createAppointmentRequest)
     {
         var result = await appointmentService.CreateAppointmentAsync(createAppointmentRequest);
-        if (!result)
+
+        if (!result.Success)
         {
-            return BadRequest(new ApiResponse(400));
+            return BadRequest(new ApiResponse(400, result.Message));
         }
-        return Ok(new ApiResponse(200));
+
+        return Ok(new ApiResponse(200, result.Message));
     }
 
     /// <summary>
@@ -56,7 +58,7 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
     /// </summary>
     /// <param name="Id">The ID of the appointment to delete.</param>
     /// <returns>Status of the deletion process.</returns>
-    [HttpDelete]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int Id)
     {
         var entity = await appointmentService.GetByIdAsync(Id);
@@ -68,15 +70,25 @@ public class AppointmentsController(IAppointmentService appointmentService) : Co
     /// <summary>
     /// Updates an existing appointment.
     /// </summary>
+    /// <param name="Id">The ID of the appointment to update.</param>
     /// <param name="updateAppointmentRequest">The appointment update request data.</param>
     /// <returns>Status of the update process.</returns>
-    [HttpPut]
-    public async Task<IActionResult> Update(UpdateAppointmentRequest updateAppointmentRequest)
+    [HttpPut("{Id}")]
+    public async Task<IActionResult> Update(int Id, UpdateAppointmentRequest updateAppointmentRequest)
     {
-        var entity = await appointmentService.GetByIdAsync(updateAppointmentRequest.Id);
-        if (entity is null) return NotFound(new ApiResponse(404));
-        var result = await appointmentService.UpdateAppointmentAsync(updateAppointmentRequest);
-        if (result is false) return BadRequest(new ApiResponse(400));
-        return Ok(new ApiResponse(200));
+        var entity = await appointmentService.GetByIdAsync(Id);
+        if (entity is null)
+        {
+            return NotFound(new ApiResponse(404, "Appointment not found."));
+        }
+
+        var result = await appointmentService.UpdateAppointmentAsync(Id, updateAppointmentRequest);
+
+        if (!result.Success)
+        {
+            return BadRequest(new ApiResponse(400, result.Message));
+        }
+        return Ok(new ApiResponse(200, result.Message));
     }
+
 }

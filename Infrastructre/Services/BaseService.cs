@@ -2,8 +2,7 @@
 using Application.Repositories;
 using Application.RequestFilters;
 using Application.Services;
-using Infrastructre.Data;
-using Mapster;
+using System.Linq.Dynamic.Core;
 
 namespace Infrastructre.Services;
 
@@ -29,19 +28,19 @@ public class BaseService<TEntity>(IUnitOfWork unitOfWork) : IBaseService<TEntity
         return await _unitOfWork.CompleteAsync() > 0;
     }
 
-    public async Task<PaginatedList<TEntity>> GetAllAsync(RequestFilter requestFilter)
+    public async Task<PaginatedList<TEntity>> GetAllAsync(RequestFilter filter)
     {
-        var entities =  _unitOfWork.Repository<TEntity>().GetQueryable();
+        var entities = _unitOfWork.Repository<TEntity>().GetQueryable();
 
-        var paginatedEntities = await PaginatedList<TEntity>.CreateAsync(
-            entities,
-            requestFilter.PageNumber,
-            requestFilter.PageSize
-        );
+        if(filter.SearchValue is not null)
 
-        return paginatedEntities;
+        entities = entities.Where(filter.SearchValue);
+
+        if(filter.SortColumn is not null && filter.SortDirection is not null)
+        entities = entities.OrderBy($"{filter.SortColumn} {filter.SortDirection}");
+
+        return await PaginatedList<TEntity>.CreateAsync(entities, filter.PageNumber, filter.PageSize);
     }
-
     public Task<TEntity?> GetByIdAsync(int id)
     {
         return _unitOfWork.Repository<TEntity>().GetByIdAsync(id);
